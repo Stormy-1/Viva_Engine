@@ -13,6 +13,7 @@ from sqlalchemy import text
 
 from app.core.config import get_settings
 from app.db.session import AsyncSessionLocal
+from app.routers import extract as extract_router
 
 settings = get_settings()
 
@@ -43,6 +44,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(extract_router.router)
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
