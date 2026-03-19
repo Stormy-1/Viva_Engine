@@ -1,26 +1,46 @@
-# VIVA ENGINE — ARCHITECTURE & RULES
-**Status:** IMMUTABLE (Update only on major stack shifts)
+# ARCHITECTURE — DO NOT MODIFY WITHOUT HUMAN APPROVAL
 
-## 1. Core Stack
-*   **Backend:** FastAPI (Python 3.10+), async/await everywhere.
-*   **Database:** Supabase (PostgreSQL) + `asyncpg` driver + `pgvector` for vector search.
-*   **ORM / Migrations:** SQLAlchemy 2.0 (async) + Alembic.
-*   **Frontend:** React + Vite + TypeScript + Tailwind CSS (Integrated from Lovable/grade-my-voice).
-*   **Core AI / ML:**
-    *   **PDF Parsing:** Docling (Local, IBM Research) for Markdown/LaTeX/tables extraction.
-    *   **Fallback Vision:** `vision-parse` (wraps Gemini 1.5 Flash).
-    *   **Embeddings & LLM:** OpenAI API (`text-embedding-3-small`, `gpt-4o-mini`).
-    *   **Spaced Repetition:** `sm-2` Python package.
-    *   **Audio / STT:** `whisper-fastapi` (OpenAI-compatible) or `faster-whisper`.
+## Tech Stack
+- Frontend: React + Vite + TailwindCSS + TypeScript
+- Backend:  FastAPI + Python 3.10+
+- Database: PostgreSQL (Supabase) via SQLAlchemy 2.0 async + pgvector
+- AI/ML:    Docling (local PDF parsing), Gemini 1.5 Flash (vision fallback via vision-parse), OpenAI text-embedding-3-small (embeddings), sm-2 (spaced repetition), whisper-fastapi (audio transcription)
 
-## 2. Infrastructure & Environments
-*   **Local Dev:** `uvicorn app.main:app --reload` (Backend on `:8000`), `npm run dev` (Frontend on `:8080`).
-*   **Proxy:** Vite proxies `/api/*` to `http://localhost:8000` to avoid CORS issues locally.
-*   **Database URL:** Handled via async SQLAlchemy `postgresql+asyncpg://...` (Alembic environment swaps this to `psycopg2` for synchronous migrations).
+## Coding Conventions
+- Language: TypeScript strict mode (no `any`)
+- File naming: kebab-case for files, PascalCase for components
+- Functions: must have docstrings if >10 lines
+- Error handling: always use try/catch, never swallow errors silently
+- No magic numbers — use named constants
 
-## 3. Immutable Development Rules
-1.  **Never Commit Secrets:** `backend/.env` is gitignored. Always use `.env.example` to track required keys.
-2.  **Strict Branching:** Work only on feature branches (`phase-<N>/<short-desc>`). Never force-push to `main`.
-3.  **End-to-End Testing:** Do not merge to `main` until the endpoint works locally with real inputs (e.g., real PDFs, real audio).
-4.  **No Poppler/System Binaries:** PDF processing relies strictly on Docling. No custom binary bundling or OS-level dependencies like poppler/Tesseract allowed unless explicitly approved.
-5.  **Use Open Source First:** Before writing complex custom logic (like spaced repetition scheduling or advanced RAG chunking), verify if an established open-source package exists and use it as a drop-in replacement.
+## Database Schema (summary)
+
+### documents
+| Column          | Type         | Notes                                          |
+|-----------------|--------------|------------------------------------------------|
+| id              | UUID (PK)    | Auto-generated                                 |
+| title           | VARCHAR(500) |                                                |
+| filename        | VARCHAR(500) |                                                |
+| file_size_bytes | INTEGER      | Nullable                                       |
+| total_pages     | INTEGER      | Nullable                                       |
+| status          | VARCHAR(50)  | pending / processing / complete / error        |
+| created_at      | TIMESTAMPTZ  | server default now()                           |
+| updated_at      | TIMESTAMPTZ  | server default now(), auto-updates             |
+
+### document_chunks
+| Column      | Type         | Notes                                              |
+|-------------|--------------|---------------------------------------------------|
+| id          | UUID (PK)    | Auto-generated                                    |
+| document_id | UUID (FK)    | → documents.id ON DELETE CASCADE                  |
+| page_number | INTEGER      |                                                   |
+| raw_text    | TEXT         | Plain text from Docling                           |
+| formulas    | TEXT         | JSON string of LaTeX formulas                     |
+| diagrams    | TEXT         | JSON string of diagram descriptions               |
+| summary     | TEXT         | LLM-generated summary (filled at question gen)    |
+| embedding   | VECTOR(1536) | OpenAI text-embedding-3-small dims                |
+| created_at  | TIMESTAMPTZ  | server default now()                              |
+
+## UI Theme
+- Colors: Violet/purple primary (`violet-600`, `violet-400`), dark background (`bg-black/5`, `bg-white/5`), emerald for success, red for errors
+- Font: System default (Inter via Tailwind base)
+- Component library: Custom components + lucide-react for icons + shadcn/ui (from Lovable base)

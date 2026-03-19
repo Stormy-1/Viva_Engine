@@ -1,27 +1,23 @@
-# VIVA ENGINE — ARCHITECTURAL DECISIONS (ADRs)
-**Status:** APPEND-ONLY (Why we chose X over Y)
+# DECISION LOG
+← Why key choices were made. Prevents agents from undoing good decisions.
 
-## 1. PDF Parsing: Docling over pdf2image/Gemini Vision
-*   **When:** 2026-03-20
-*   **Context:** `pdf2image` relies on `poppler`, which is notoriously difficult to install reliably across different OS environments (especially Windows). Constant "access denied" or path issues slowed development.
-*   **Decision:** Replaced custom image-slicing logic with `Docling`.
-*   **Why:** Docling is a local, AI-powered document parser from IBM. It natively extracts text with proper structure, tables into markdown, and formulas into LaTeX without requiring external binaries or incurring API costs.
-*   **Alternative Kept:** `vision-parse` using Gemini 1.5 Flash was kept as a fallback (`USE_VISION_FALLBACK=true`) for edge cases like handwritten diagrams.
+## PDF Parsing: Docling over pdf2image/poppler — 2026-03-20
+- Chose: Docling (IBM Research document parser)
+- Rejected: pdf2image + poppler binaries
+- Why: `poppler` is a system-level HTTP/C++ binary that is notoriously difficult to install and manage consistently across different OS environments (especially Windows). Constant "access denied" or nested PATH issues broke the pipeline. Docling runs entirely locally in Python, understands native layout, and extracts LaTeX formulas perfectly without any system dependencies.
+- Fallback Chosen: `vision-parse` (wraps Gemini 1.5 API) for cases where extreme OCR/handwriting quality beats Docling's local models.
 
-## 2. Spaced Repetition: `sm-2` package over Custom Implementation
-*   **When:** 2026-03-20
-*   **Context:** Planned to build `sm2_scheduler.py` from scratch.
-*   **Decision:** Adopted the open-source `sm-2` Python pip package.
-*   **Why:** Re-inventing the SuperMemo-2 algorithm introduces unnecessary risk of math/scheduling bugs. The open-source package is battle-tested.
+## Spaced Repetition: sm-2 pip package over Custom Logic — 2026-03-20
+- Chose: `sm-2` Python package
+- Rejected: Writing a custom `sm2_scheduler.py` from scratch
+- Why: Re-inventing the SuperMemo-2 math introduces unnecessary complexity and risk of scheduling bugs. The `sm-2` package is battle-tested open source and acts as a pure drop-in replacement (`scheduler.review_card(rating)`).
 
-## 3. Database Driver: `asyncpg` over `psycopg2` (Runtime)
-*   **When:** Day 1
-*   **Context:** Need high-concurrency database access for a FastAPI app.
-*   **Decision:** Use `asyncpg` via SQLAlchemy 2.0 for all API calls. Alembic uses `psycopg2` via a synchronous URL swap in `env.py`.
-*   **Why:** `asyncpg` provides the best asynchronous performance for PostgreSQL in Python.
+## Database Driver: asyncpg over psycopg2 — 2026-03-19
+- Chose: `asyncpg` (FastAPI runtime)
+- Rejected: `psycopg2` (for runtime)
+- Why: `asyncpg` offers vastly superior asynchronous performance for FastAPI applications. However, Alembic migrations don't natively support `asyncpg` seamlessly, so `psycopg2` string replacements were kept localized to `alembic/env.py` exclusively for sync schema migrations.
 
-## 4. Voice Transcription: `whisper-fastapi` over Custom OpenAI calls
-*   **When:** 2026-03-20
-*   **Context:** Need robust audio transcription.
-*   **Decision:** Will use the `whisper-fastapi` open-source implementation.
-*   **Why:** It provides an OpenAI-compatible `/v1/audio/transcriptions` endpoint out of the box, allowing us to seamlessly swap between local (`faster-whisper`) and cloud OpenAI depending on cost and latency needs.
+## Voice Transcription: whisper-fastapi over Custom Implementation — 2026-03-20
+- Chose: `whisper-fastapi`
+- Rejected: Writing a custom FastAPI wrapper for the OpenAI client
+- Why: It provides an exact replica of OpenAI's `/v1/audio/transcriptions` endpoint out of the box. This means frontend code (`VoiceRecorder.tsx`) can point to the local instance or seamlessly swap URL base strings if we get rate-limited, without rewriting standard API request logic.

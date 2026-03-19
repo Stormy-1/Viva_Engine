@@ -1,24 +1,28 @@
-# VIVA ENGINE — CURRENT STATE
-**Status:** LIVE (Update frequently)
+# CURRENT PROJECT STATE
+← Update this EVERY time before switching IDE or account
 
-## Timeline
-*   **Phase 1** (Days 1-5): Fast API Scaffold, Supabase Connection, PDF Extraction (Docling) — **Complete**
-*   **Phase 1** (Days 6-7): Vector Search PoC — **Next**
-*   **Phase 2** (Days 8-14): SM-2 + Quiz Generation + Voice Grading Pipeline — **Pending**
-*   **Phase 3** (Days 22-28): Polish, UI, Deploy — **Pending**
+## 🎯 Project Goal
+Viva Engine is a voice-first RAG study app that ingests PDFs, extracts content via Docling, generates flashcard questions with an LLM, and grades spoken student answers using Whisper + GPT — with SM-2 spaced repetition scheduling to optimize review.
 
-## Current Status (2026-03-20)
-*   The backend scaffold is built and connected to a remote Supabase instance.
-*   Alembic migrations have successfully created the `documents` and `document_chunks` tables (with `pgvector` enabled).
-*   The PDF extraction pipeline has been completely rewritten to use **Docling** instead of `pdf2image` + `poppler`. This removes nasty local OS binary dependencies.
-*   The `POST /api/extract/test` endpoint functions successfully.
-*   The frontend has a working drag-and-drop `FileUpload.tsx` component that hits the API.
+## 📍 Immediate Task
+Starting Days 6-7: Vector Search PoC — implementing `app/services/embedding_service.py` to generate OpenAI embeddings for `DocumentChunk` rows and a `GET /api/search?q=` endpoint to test pgvector cosine similarity.
 
-## Known Bugs / Issues
-*   None currently. Local Docling model download timeout was resolved.
+## ✅ What Is Working
+- `/health` endpoint — confirms live Supabase asyncpg connection
+- Alembic migrations — `documents` and `document_chunks` tables exist in Supabase with `pgvector` enabled
+- `POST /api/extract/test` — accepts a PDF upload, runs Docling locally, returns per-page markdown + LaTeX formulas as JSON
+- `FileUpload.tsx` — drag-and-drop frontend component that hits the extract API
+- Vite proxy `/api/*` → `http://localhost:8000` working
 
-## Immediate Next Steps (For the Agent)
-1.  Switch focus to **Days 6-7: Vector Search Proof of Concept**.
-2.  Implement `app/services/embedding_service.py` using `AsyncOpenAI`.
-3.  Implement document chunking logic (storing chunks in the `document_chunks` table with vectors).
-4.  Build a test `GET /api/search?q=` endpoint to verify pgvector cosine similarity.
+## 🐛 Known Bugs
+- None currently active
+
+## 🚫 Do NOT Touch
+- `frontend/src/` Lovable-generated base layout and styling — do not redesign or restructure
+
+## 🚀 Next Steps for Agent (in order)
+1. Create `backend/app/services/embedding_service.py` — async OpenAI embeddings using `text-embedding-3-small` (1536 dims)
+2. Add a `POST /api/ingest` endpoint in `backend/app/routers/ingest.py` — runs Docling extraction then stores chunks + embeddings in `document_chunks`
+3. Add a `GET /api/search?q=` endpoint in `backend/app/routers/search.py` — embeds the query and runs pgvector cosine similarity against `document_chunks.embedding`
+4. Test end-to-end: upload a PDF → ingest → search with a real query → verify top-5 chunks returned
+5. Commit to `phase-1/vector-search` and push to GitHub

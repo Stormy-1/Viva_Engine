@@ -1,27 +1,83 @@
-# VIVA ENGINE — PROJECT STRUCTURE
-backend/
-  alembic/                   # DB Migrations (Uses synchronous psycopg2)
-  app/
-    core/
-      config.py              # Pydantic BaseSettings (.env loading)
-    db/
-      session.py             # Async engine & get_db dependency
-    models/                  # SQLAlchemy ORM
-      document.py            # Document, DocumentChunk (with Vector(1536))
-    routers/                 # FastAPI Endpoints
-      extract.py             # POST /api/extract/test
-    services/                # Business Logic
-      docling_service.py     # Wraps Docling converter + VisionParse fallback
-      gemini_service.py      # Maintained for grading later
-    main.py                  # App entrypoint, CORS, /health
-  requirements.txt           # Python dependencies
+# VIVA ENGINE — PROJECT STRUCTURE (Auto-generated)
+# Update via: python get_tree.py > @structure.txt
 
-frontend/
-  src/
-    components/
-      FileUpload.tsx         # Drag-and-drop PDF component hitting extract API
-  vite.config.ts             # Contains API proxy to localhost:8000
-
-# Key Signatures
-- `docling_service.py`: `DoclingService.extract_pdf_bytes(pdf_bytes, filename, max_pages) -> ExtractionResult`
-- `app/db/session.py`: `async def get_db() -> AsyncGenerator[AsyncSession, None]`
+./.cursorrules
+./.gitignore
+./@architecture.md
+./@changelog.md
+./@current_state.md
+./@decisions.md
+./@out_of_scope.md
+./@structure.txt
+./CONTEXT.md
+./README.md
+./backend/.env
+./backend/.env.example
+./backend/alembic.ini
+./backend/alembic/README
+./backend/alembic/env.py
+./backend/alembic/script.py.mako
+./backend/alembic/versions/2a7fdd74ad01_initial_documents_and_chunks.py
+./backend/app/__init__.py
+./backend/app/core/__init__.py
+./backend/app/core/config.py
+./backend/app/db/__init__.py
+./backend/app/db/session.py
+./backend/app/main.py
+./backend/app/models/__init__.py
+./backend/app/models/document.py
+./backend/app/routers/__init__.py
+./backend/app/routers/extract.py
+./backend/app/services/__init__.py
+./backend/app/services/docling_service.py
+./backend/app/services/gemini_service.py
+./backend/app/services/pdf_processor.py
+./backend/requirements.txt
+./build_checklist_pdf (1).pdf
+./frontend/.gitignore
+./frontend/README.md
+./frontend/bun.lock
+./frontend/bun.lockb
+./frontend/components.json
+./frontend/eslint.config.js
+./frontend/index.html
+./frontend/package-lock.json
+./frontend/package.json
+./frontend/playwright-fixture.ts
+./frontend/playwright.config.ts
+./frontend/postcss.config.js
+./frontend/public/favicon.ico
+./frontend/public/placeholder.svg
+./frontend/public/robots.txt
+./frontend/src/App.css
+./frontend/src/App.tsx
+./frontend/src/components/CardDisplay.tsx
+./frontend/src/components/DashboardLayout.tsx
+./frontend/src/components/DocumentCard.tsx
+./frontend/src/components/FileUpload.tsx
+./frontend/src/components/NavLink.tsx
+./frontend/src/components/ProcessingStatus.tsx
+./frontend/src/components/SessionLayout.tsx
+./frontend/src/components/SessionProgressBar.tsx
+./frontend/src/components/StatCard.tsx
+./frontend/src/components/UploadZone.tsx
+./frontend/src/components/VoiceRecorder.tsx
+./frontend/src/components/ui/accordion.tsx
+./frontend/src/components/ui/alert-dialog.tsx
+./frontend/src/components/ui/alert.tsx
+./frontend/src/components/ui/aspect-ratio.tsx
+./frontend/src/components/ui/avatar.tsx
+./frontend/src/components/ui/badge.tsx
+./frontend/src/components/ui/breadcrumb.tsx
+./frontend/src/components/ui/button.tsx
+./frontend/src/components/ui/calendar.tsx
+./frontend/src/components/ui/card.tsx
+./frontend/src/components/ui/carousel.tsx
+./frontend/src/components/ui/chart.tsx
+./frontend/src/components/ui/checkbox.tsx
+./frontend/src/components/ui/collapsible.tsx
+./frontend/src/components/ui/command.tsx
+./frontend/src/components/ui/context-menu.tsx
+./frontend/src/components/ui/dialog.tsx
+./frontend/src/components/ui/drawer.tsx
+./frontend/src/components/ui/dropdown-menu.tsx
