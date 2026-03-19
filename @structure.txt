@@ -1,0 +1,27 @@
+# VIVA ENGINE — PROJECT STRUCTURE
+backend/
+  alembic/                   # DB Migrations (Uses synchronous psycopg2)
+  app/
+    core/
+      config.py              # Pydantic BaseSettings (.env loading)
+    db/
+      session.py             # Async engine & get_db dependency
+    models/                  # SQLAlchemy ORM
+      document.py            # Document, DocumentChunk (with Vector(1536))
+    routers/                 # FastAPI Endpoints
+      extract.py             # POST /api/extract/test
+    services/                # Business Logic
+      docling_service.py     # Wraps Docling converter + VisionParse fallback
+      gemini_service.py      # Maintained for grading later
+    main.py                  # App entrypoint, CORS, /health
+  requirements.txt           # Python dependencies
+
+frontend/
+  src/
+    components/
+      FileUpload.tsx         # Drag-and-drop PDF component hitting extract API
+  vite.config.ts             # Contains API proxy to localhost:8000
+
+# Key Signatures
+- `docling_service.py`: `DoclingService.extract_pdf_bytes(pdf_bytes, filename, max_pages) -> ExtractionResult`
+- `app/db/session.py`: `async def get_db() -> AsyncGenerator[AsyncSession, None]`

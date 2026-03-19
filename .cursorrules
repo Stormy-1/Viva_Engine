@@ -1,0 +1,26 @@
+# VIVA ENGINE CONTEXT RULES
+# Always run these instructions before executing anything else.
+
+# 1. READ CONTEXT FIRST
+# Never start coding or analyzing without first performing:
+# - cat @current_state.md
+# - cat @architecture.md
+# - cat @out_of_scope.md
+# - cat @decisions.md
+
+# 2. FILE MODIFICATIONS
+# - Always check @structure.txt to know where files belong.
+# - Update @changelog.md with a 1-sentence summary of your action after completing a task.
+# - If you finish a phase/task, update @current_state.md immediately.
+# - If you make a significant architecture choice (e.g. adding a new library), update @decisions.md.
+
+# 3. STRICT BOUNDARIES
+# - DO NOT touch Lovable-generated base styling unless explicitly ordered.
+# - DO NOT write custom implementations for things identified as open-source in @decisions.md (e.g., spaced repetition, audio transcription).
+# - NEVER commit backend/.env.
+
+# 4. GIT WORKFLOW
+# - Never work directly on `main`.
+# - Use `git checkout -b phase-<N>/<feature-name>`
+# - Run Python backend: `uvicorn app.main:app --reload`
+# - Run Frontend: `npm run dev`
