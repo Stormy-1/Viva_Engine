@@ -1,21 +1,20 @@
 /**
  * FileUpload.tsx — Drag-and-drop PDF upload component for Viva Engine.
  *
- * Wired to POST /api/extract/test — returns Docling JSON extraction results.
- * Response shape: { filename, pages_extracted, total_pages, file_size_mb, pages[] }
- * Each page:       { page_number, markdown, raw_text, formulas: string[], summary }
+ * Wired to POST /api/extract/test — returns Docling extraction results.
+ * Docling returns: page_number, markdown, raw_text, formulas (string[]), summary.
  */
 
 import { useState, useCallback, useRef } from "react";
 import { Upload, FileText, Loader2, CheckCircle, AlertCircle, X } from "lucide-react";
 
-/** Matches docling_service.py → PageContent.to_dict() */
+/** One page of content as returned by DoclingService.to_dict() */
 interface PageContent {
   page_number: number;
-  markdown: string;         // full markdown for this page
-  raw_text: string;         // plain text (markdown stripped)
-  formulas: string[];       // LaTeX strings e.g. "$$E=mc^2$$"
-  summary: string;          // empty until question-gen phase fills it
+  markdown: string;
+  raw_text: string;
+  formulas: string[];   // LaTeX strings, e.g. "$$E = mc^2$$"
+  summary: string;      // Empty until question-gen phase fills it
 }
 
 interface ExtractionResult {
@@ -227,33 +226,25 @@ export function FileUpload() {
 
           {result.pages.map((page) => (
             <div key={page.page_number} className="p-5 rounded-xl bg-white/5 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider">
-                  Page {page.page_number}
-                </h3>
-                <span className="text-white/30 text-xs">
-                  {page.raw_text.length} chars
-                </span>
-              </div>
+              <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider">
+                Page {page.page_number}
+              </h3>
 
-              {/* Summary — empty until question-gen phase */}
-              {page.summary && (
-                <p className="text-white/60 text-sm leading-relaxed">{page.summary}</p>
+              {/* Raw text preview — summary is filled later at question-gen phase */}
+              {page.raw_text && (
+                <p className="text-white/60 text-sm leading-relaxed line-clamp-4">
+                  {page.raw_text.slice(0, 400)}{page.raw_text.length > 400 ? "…" : ""}
+                </p>
               )}
-
-              {/* Raw text preview (first 300 chars) */}
-              <p className="text-white/50 text-xs leading-relaxed font-mono bg-black/20 px-3 py-2 rounded">
-                {page.raw_text.slice(0, 300)}{page.raw_text.length > 300 ? "…" : ""}
-              </p>
 
               {/* LaTeX formulas extracted by Docling */}
               {page.formulas.length > 0 && (
                 <div>
                   <p className="text-white/40 text-xs mb-1 uppercase tracking-wider">
-                    {page.formulas.length} Formula{page.formulas.length !== 1 ? "s" : ""}
+                    Formulas ({page.formulas.length})
                   </p>
                   {page.formulas.map((formula, i) => (
-                    <code key={i} className="block text-yellow-300 text-xs bg-black/30 px-3 py-1.5 rounded mb-1">
+                    <code key={i} className="block text-yellow-300 text-xs bg-black/30 px-3 py-1.5 rounded mb-1 font-mono">
                       {formula}
                     </code>
                   ))}
