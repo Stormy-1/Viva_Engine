@@ -16,6 +16,7 @@ from app.db.session import AsyncSessionLocal
 from app.routers import extract as extract_router
 from app.routers import ingest as ingest_router
 from app.routers import search as search_router
+from app.routers import questions as questions_router
 
 settings = get_settings()
 
@@ -52,6 +53,7 @@ app.add_middleware(
 app.include_router(extract_router.router)
 app.include_router(ingest_router.router)
 app.include_router(search_router.router)
+app.include_router(questions_router.router)
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
