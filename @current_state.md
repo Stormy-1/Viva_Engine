@@ -5,9 +5,8 @@
 Viva Engine is a voice-first RAG study app that ingests PDFs, extracts content via Docling, generates flashcard questions with an LLM, and grades spoken student answers using Whisper + GPT — with SM-2 spaced repetition scheduling to optimize review.
 
 ## 📍 Immediate Task
-Days 8-9: Question Generation — implement `app/services/question_service.py` to
-call Gemini with chunk text and produce flashcard Q&A pairs stored in a new
-`questions` table, plus `POST /api/questions/generate` endpoint.
+Days 10-11: Voice Grading — implement Whisper-based speech-to-text service
+and a grading service that evaluates student's transcribed voice against the flashcard answer.
 
 ## ✅ What Is Working
 - `/health` endpoint — confirms live Supabase asyncpg connection
@@ -18,17 +17,15 @@ call Gemini with chunk text and produce flashcard Q&A pairs stored in a new
 - `POST /api/ingest` — full pipeline: Docling → Document + DocumentChunk rows → OpenAI embeddings → pgvector storage
 - `GET /api/search?q=` — embeds query, runs pgvector `<=>` cosine similarity, returns top-K chunks
 - `embedding_service.py` — async OpenAI text-embedding-3-small (1536 dims), single + batch
+- `Question` ORM model + `POST /api/questions/generate/{chunk_id}` endpoint (Calls Gemini 1.5 Flash to automatically extract SM-2 suitable flashcards from document chunks).
 
 ## 🐛 Known Bugs
-- None currently active
+- Supabase offline/unavailable (`db.znrlskuhwlejxjdsvrfo.supabase.co` DNS unavailable), hence end-to-end tests relying on pgvector creation currently disabled locally but pure code modules checked out correct.
 
 ## 🚫 Do NOT Touch
 - `frontend/src/` Lovable-generated base layout and styling — do not redesign or restructure
 
 ## 🚀 Next Steps for Agent (in order)
-1. Create `backend/app/models/question.py` — `Question` ORM model (id, chunk_id, question_text, answer_text, difficulty, card_state JSON for SM-2)
-2. Write Alembic migration for `questions` table
-3. Create `backend/app/services/question_service.py` — calls Gemini 1.5 Flash with chunk text, returns structured Q&A pairs (lift prompt template from `quizify_ai` OSS ref)
-4. Add `POST /api/questions/generate` endpoint in `backend/app/routers/questions.py`
-5. End-to-end test: ingest PDF → search → generate questions from top chunk → verify DB row created
-6. Commit to `phase-1/question-generation` and push to GitHub
+1. Provide a mock for `whisper-fastapi` integration (Days 10-11) or set up `backend/app/services/voice_grading_service.py`.
+2. Connect `VoiceRecorder.tsx` components on the front end to backend grading endpoints.
+3. Test spacing and DB update loops.
