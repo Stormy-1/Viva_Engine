@@ -14,6 +14,8 @@ from sqlalchemy import text
 from app.core.config import get_settings
 from app.db.session import AsyncSessionLocal
 from app.routers import extract as extract_router
+from app.routers import ingest as ingest_router
+from app.routers import search as search_router
 
 settings = get_settings()
 
@@ -48,6 +50,8 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(extract_router.router)
+app.include_router(ingest_router.router)
+app.include_router(search_router.router)
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
